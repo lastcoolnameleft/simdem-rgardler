@@ -107,6 +107,10 @@ class Demo(object):
         Each line in a code block will be treated as a separate command.
         All other lines will be ignored
         """
+        if self.script_dir.startswith("http"):
+            directory = "./"
+        else:
+            directory = self.script_dir
         self.env = Environment(self.script_dir, is_test = self.is_testing)
 
         if not self.script_dir.endswith('/'):

@@ -16,11 +16,7 @@ class Environment(object):
         self.is_test = is_test
         self.set("SIMDEM_VERSION", config.SIMDEM_VERSION)
         self.set("SIMDEM_CWD", directory)
-        if (directory.startswith("http")):
-            # FIXME: should be able to set environment even when running a web hosted script
-            return
-        else:
-            self.read_simdem_environment(directory)
+        self.read_simdem_environment(directory)
         
     def read_simdem_environment(self, directory):
         """Populates each shell environment with a set of environment vars
