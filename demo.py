@@ -56,6 +56,10 @@ class Demo(object):
         return lines
 
     def generate_toc(self):
+        if (self.script_dir.startswith("http://")):
+            self.ui.error("Unable to generate TOCs from web hosted sources")
+            sys.exit("Unable to generate TOCs from web hosted sources")
+        
         toc = {}
         lines = []
         lines.append("# Welcome to Simdem\n")
@@ -122,11 +126,18 @@ class Demo(object):
                         lines = lines + list(open(file))
 
         file = self.script_dir + self.filename
-        if not lines and os.path.isfile(file):
-            lines = list(open(file))
+        if (not file.startswith("http")):
+            if not lines and os.path.isfile(file):
+                lines = list(open(file))
+            elif not lines:
+                lines = self.generate_toc()
         elif not lines:
-            lines = self.generate_toc()
-                    
+            import urllib.request
+            response = urllib.request.urlopen(file)
+            data = response.read()
+            text = data.decode('utf-8')
+            lines = text.splitlines(True)
+                
         in_code_block = False
         in_results_section = False
         expected_results = ""

@@ -56,7 +56,7 @@ def main():
     p.add_option('--style', '-s', default="tutorial",
                  help="The style of simulation you want to run. 'tutorial' (the default) will print out all text and pause for user input before running commands. 'simulate' will not print out the text but will still pause for input.")
     p.add_option('--path', '-p', default="demo_scripts/",
-                 help="The Path to the demo scripts directory.")
+                 help="The Path to the demo scripts directory. This can be a local path or an http:// address.")
     p.add_option('--auto', '-a', default="False",
                  help="Set to 'true' (or 'yes') to prevent the application waiting for user keypresses between commands. Set to 'no' when running in test mode to allow users to step through each test.")
     p.add_option('--test', '-t', default="False",

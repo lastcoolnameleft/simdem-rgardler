@@ -52,6 +52,18 @@ class Ui(object):
         self.display(text, colorama.Fore.WHITE, new_line)
         self.new_para()
 
+    def warn(self, text, new_line = False):
+        """Display an warning message
+        """
+        self.display(text, colorama.Fore.ORANGE, new_line)
+        self.new_para()
+
+    def error(self, text, new_line = False):
+        """Display an error message
+        """
+        self.display(text, colorama.Fore.RED, new_line)
+        self.new_para()
+
     def next_step(self, index, title):
         """Displays a next step item with an index (the number to be entered
 to select it) and a title (to be displayed).
