@@ -8,6 +8,7 @@ import random
 import time
 import sys
 import colorama
+import config
 colorama.init(strip=None)
 
 PEXPECT_PROMPT = u'[PEXPECT_PROMPT>'
@@ -64,13 +65,18 @@ class Ui(object):
         self.display(text, colorama.Fore.RED, new_line)
         self.new_para()
 
+    def prep_step(self, step):
+        """Displays a preparation step item.
+        """
+        self.display(step["title"], colorama.Fore.MAGENTA, True)
+        
     def next_step(self, index, title):
         """Displays a next step item with an index (the number to be entered
 to select it) and a title (to be displayed).
         """
         self.display(index, colorama.Fore.CYAN)
         self.display(title, colorama.Fore.CYAN, True)
-
+        
     def instruction(self, text):
         """Display an instruction for the user.
         """
@@ -147,7 +153,7 @@ to select it) and a title (to be displayed).
             if char != "\n":
                 self.command(char)
             if demo.is_simulation:
-                delay = random.uniform(0.01, 0.04)
+                delay = random.uniform(0.01, config.TYPING_DELAY)
                 time.sleep(delay)
 
     def simulate_command(self, demo):
