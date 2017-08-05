@@ -4,7 +4,7 @@ import difflib
 import os
 import re
 import sys
-
+import urllib.request
 from environment import Environment
 from cli import Ui
 
@@ -31,13 +31,15 @@ class Demo(object):
         Return a tuple of the current command and a list of environment
         variables that haven't been set.
         """
-        var_pattern = re.compile(".*?(?<=\$)(?<=\(){?(\w*)(?=[\W|\$|\s|\\\"]?)(?!\$).*?")
+        var_pattern = re.compile(".*?(?<=\$)\(?{?(\w*)(?=[\W|\$|\s|\\\"]?)\)?(?!\$).*")
         matches = var_pattern.findall(self.current_command)
         var_list = []
         if matches:
             for var in matches:
-                if var != "" and (var not in self.env.get() or self.env.get(var) == ""):
-                    var_list.append(var)
+                if len(var) > 0:
+                    value = self.ui.get_shell(self).run_command("echo $" + var).strip()
+                    if len(value) == 0 and not '$(' + var + ')' in self.current_command:
+                        var_list.append(var)
         return self.current_command, var_list
 
     def get_scripts(self, directory):
@@ -126,11 +128,17 @@ class Demo(object):
                             lines = lines + list(open(file))
 
         file = self.script_dir + self.filename
-            
-        if not lines and os.path.isfile(file):
-            lines = list(open(file))
-        elif not lines:
-            lines = self.generate_toc()
+
+        if file.startswith("http"):
+            # FIXME: Error handling
+            response = urllib.request.urlopen(file)
+            data = response.read().decode("utf-8")
+            lines = data.splitlines(True)
+        else:
+            if not lines and os.path.isfile(file):
+                lines = list(open(file))
+            elif not lines:
+                lines = self.generate_toc()
                     
         in_code_block = False
         in_results_section = False
