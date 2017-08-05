@@ -6,8 +6,10 @@
 import optparse
 import os
 import sys
+import time
 
 from cli import Ui
+from web import WebUi
 import config
 from demo import Demo
 from environment import Environment
@@ -69,6 +71,8 @@ def main():
                  help="If set to anything other than False the output of the command will be compared to the expected results in the sript. Any failures will be reported")
     p.add_option('--fastfail', default="True",
                  help="If set to anything other than True test execution has will stop on the first failure. This has no affect if running in any mode other than 'test'.")
+    p.add_option('--webui', '-w', default="False",
+                 help="If set to anything other than False will interact with the user through a Web UI rather than the CLI.")
 
     options, arguments = p.parse_args()
 
@@ -98,8 +102,14 @@ def main():
     else:
         script_dir = options.path
 
-    ui = Ui()
-    
+    if options.webui == "False":
+        ui = Ui()
+    else:
+        ui = WebUi()
+        while not ui.ready:
+            time.sleep(0.25)
+            print("Waiting for UI")
+        
     if len(arguments) == 0:
         cmd = "unkown"
         while not cmd in commands:
