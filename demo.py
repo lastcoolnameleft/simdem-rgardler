@@ -12,6 +12,7 @@ class Demo(object):
     def __init__(self, ui, is_running_in_docker, script_dir="demo_scripts", filename="script.md", is_simulation=True, is_automated=False, is_testing=False, is_fast_fail=True,is_learning = False, is_prerequisite = False):
         """Initialize variables"""
         self.ui = ui
+        ui.set_demo(self)
         self.is_docker = is_running_in_docker
         self.filename = filename
         self.script_dir = script_dir
@@ -37,7 +38,7 @@ class Demo(object):
         if matches:
             for var in matches:
                 if len(var) > 0:
-                    value = self.ui.get_shell(self).run_command("echo $" + var).strip()
+                    value = self.ui.get_shell().run_command("echo $" + var).strip()
                     if len(value) == 0 and not '$(' + var + ')' in self.current_command:
                         var_list.append(var)
         return self.current_command, var_list
@@ -205,10 +206,10 @@ class Demo(object):
                 else:
                     if not self.is_learning:
                         self.ui.prompt()
-                        self.ui.check_for_interactive_command(self)
+                        self.ui.check_for_interactive_command()
                         
                     self.current_command = line
-                    actual_results = self.ui.simulate_command(self)
+                    actual_results = self.ui.simulate_command()
                     executed_code_in_this_section = True
             elif line.startswith("#") and not in_code_block and not in_results_section and not self.is_automated:
                 # Heading in descriptive text, indicating a new section
@@ -228,13 +229,13 @@ class Demo(object):
                 if line.lower().strip().endswith("# prerequisites"):
                     in_prerequisites = True
                 if is_first_line:
-                    self.ui.clear(self)
+                    self.ui.clear()
                 elif executed_code_in_this_section:
                     executed_code_in_this_section = False
                     self.ui.prompt()
-                    self.ui.check_for_interactive_command(self)
+                    self.ui.check_for_interactive_command()
                     self.current_description += line;
-                    self.ui.clear(self)
+                    self.ui.clear()
                         
                 if not self.is_simulation:
                     self.ui.heading(line)
@@ -336,7 +337,7 @@ class Demo(object):
                 self.ui.horizontal_rule()
                 demo = Demo(self.ui, self.is_docker, new_dir, filename, self.is_simulation, self.is_automated, self.is_testing, self.is_fast_fail, self.is_learning, True);
                 demo.run()
-                self.ui.clear(self)
+                self.ui.clear()
                 self.ui.information("'" + step["title"] + "' prerequisite completed.", True)
                 self.ui.new_para
                 
