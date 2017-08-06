@@ -341,4 +341,18 @@ class Demo(object):
                 self.ui.information("'" + step["title"] + "' prerequisite completed.", True)
                 self.ui.new_para
                 
-                
+    def __str__( self ):
+        s = "Demo directory: " + self.script_dir + "\n"
+        s += "Demo filename: " + self.filename + "\n"
+        if self.is_docker:
+            s += "Running in a Docker container\n"
+        else:
+            s += "Not running in a Docker container\n"
+        s += "Simulation mode: {0}\n".format(self.is_simulation)
+        s += "Automotic mode: {0}\n".format(self.is_automated)
+        s += "Learn mode: {0}\n".format(self.is_learning)
+        s += "Test mode: {0}\n".format(self.is_testing)
+        if self.is_testing:
+            s += "Fast fail test mode: {0}\n".format(self.is_fast_fail)
+        
+        return s
