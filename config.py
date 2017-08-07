@@ -6,3 +6,11 @@ TYPING_DELAY = 0.08
 
 # Prompt to use in the console
 console_prompt = "$ "
+
+# ------------------------------------------------------------------ #
+# Danger zone
+#
+# Do not change anything after this notice,
+# unless you know what you are doing
+# ------------------------------------------------------------------ #
+modes = [ "tutorial", "demo", "learn", "test", "script" ]

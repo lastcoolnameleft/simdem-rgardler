@@ -14,47 +14,10 @@ import config
 from demo import Demo
 from environment import Environment
 
-def get_bash_script(script_dir, is_simulation = True, is_automated=False, is_testing=False):
-    """
-    Reads a script.md file in the indicated directoy and builds an
-    executable bash script from the commands contained within.
-    """
-    if not script_dir.endswith('/'):
-        script_dir = script_dir + "/"
-    filename = script_dir + "script.md"
-
-
-    script = ""
-    env = Environment(script_dir, False).get()
-    for key, value in env.items():
-        script += key + "='" + value + "'\n"
-
-    in_code_block = False
-    in_results_section = False
-    lines = list(open(filename))
-    for line in lines:
-        if line.startswith("Results:"):
-            # Entering results section
-            in_results_section = True
-        elif line.startswith("```") and not in_code_block:
-            # Entering a code block, if in_results_section = True then it's a results block
-            in_code_block = True
-        elif line.startswith("```") and in_code_block:
-            # Finishing code block
-            in_results_section = False
-            in_code_block = False
-        elif in_code_block and not in_results_section:
-            # Executable line
-            script += line
-        elif line.startswith("#") and not in_code_block and not in_results_section and not is_automated:
-            # Heading in descriptive text
-            script += "\n"
-    return script
-
 def main():
     """SimDem CLI interpreter"""
 
-    commands = [ "tutorial", "demo", "learn", "test", "script"]
+    commands = config.modes
     command_string = ""
     for command in commands:
         command_string = command_string + command + "|"
@@ -89,6 +52,11 @@ def main():
     else:
         is_test = True
 
+    if options.fastfail == "True":
+        is_fast_fail= True
+    else:
+        is_fast_fail= False
+        
     if options.style == "simulate":
         simulate = True
     elif options.style == 'tutorial':
@@ -101,44 +69,26 @@ def main():
         script_dir = options.path + arguments[1]
     else:
         script_dir = options.path
+        
+    filename = "script.md"
+    is_docker = os.path.isfile('/.dockerenv')
+    demo = Demo(is_docker, script_dir, filename, simulate, is_automatic, is_test);
 
     if options.webui == "False":
         ui = Ui()
+        if len(arguments) > 0:
+            cmd = arguments[0]
+            # 'run' is deprecated in the CLI, but not yet removed from code
+            if cmd == "tutorial":
+                cmd = "run"
     else:
         ui = WebUi()
         while not ui.ready:
             time.sleep(0.25)
-            print("Waiting for UI")
-        
-    if len(arguments) == 0:
-        cmd = ui.get_command(commands)
-    else:
-        cmd = arguments[0]
+            print("Waiting for client connection")
+        cmd = None
 
-    if cmd == "tutorial":
-        cmd = "run"
-        
-    filename = "script.md"
-    is_docker = os.path.isfile('/.dockerenv')
-    if cmd == "run":
-        demo = Demo(ui, is_docker, script_dir, filename, simulate, is_automatic, is_test);
-        demo.run()
-    elif cmd == "demo":
-        demo = Demo(ui, is_docker, script_dir, filename, True, is_automatic, is_test);
-        demo.run()
-    elif cmd == "test":
-        is_automatic = not options.auto.lower() == "no"
-        is_test = True and options.test
-        is_fast_fail = options.fastfail == "True"
-        demo = Demo(ui, is_docker, script_dir, filename, simulate, is_automatic, is_test, is_fast_fail=is_fast_fail);
-        demo.run()
-    elif cmd == "script":
-        print(get_bash_script(script_dir))
-    elif cmd == "learn":
-        demo = Demo(ui, is_docker, script_dir, filename, simulate, is_automatic, is_test, is_learning=True);
-        demo.run()
-    else:
-        print("Unknown command: " + cmd)
-        print("Run with --help for guidance.")
-
+    demo.set_ui(ui)
+    demo.run(cmd)
+    
 main()
